@@ -1,0 +1,68 @@
+.skills-section { background: var(--bg); }
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skill-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 2rem;
+  transition: var(--t-med), opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.skill-block:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+.skill-block-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skill-block-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.skill-block-title {
+  font-family: var(--font-h);
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--text-h);
+}
+
+.skills-chip-grid {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+}
+
+.skill-chip {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--text-b);
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 980px;
+  padding: 6px 14px;
+  transition: var(--t-fast);
+}
+
+.skill-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text-h);
+  background: rgba(255,255,255,0.05);
+}
+
+/* Fix devicon rendering inside chips */
+.skill-chip [class^="devicon-"] {
+  font-family: 'devicon' !important;
+}
