@@ -24,7 +24,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // DB Connection
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://divyanshutiwari500_db_user:OR85ikHIi8ZQM1Fg@cluster0.y9iw5ro.mongodb.net/portfolio?appName=Cluster0';
+const mongoURI = process.env.MONGO_URI;
+
+if (!mongoURI) {
+  console.error('CRITICAL ERROR: MONGO_URI is not defined in environment variables. Please check your .env file.');
+}
 
 // Disable buffering globally so queries fail immediately if DB is offline/unreachable
 mongoose.set('bufferCommands', false);

@@ -83,6 +83,11 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeSlideUpCenter {
+  from { opacity: 0; transform: translate(-50%, 28px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
 .fade-line-5 { animation: fadeSlideUp 0.8s var(--ease) 1.1s both; }
 
 /* Placement strip */
@@ -138,8 +143,10 @@
   align-items: center;
   gap: 0.4rem;
   cursor: pointer;
-  animation: fadeSlideUp 0.8s var(--ease) 1.3s both;
+  animation: fadeSlideUpCenter 0.8s var(--ease) 1.3s both;
   transition: opacity 0.2s;
+  width: max-content;
+  text-align: center;
 }
 
 .hero-scroll:hover { opacity: 0.7; }

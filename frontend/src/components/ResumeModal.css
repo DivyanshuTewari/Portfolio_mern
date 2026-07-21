@@ -1,0 +1,134 @@
+.resume-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.resume-modal-container {
+  background: rgba(18, 18, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 960px;
+  height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.resume-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.resume-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.pdf-badge-icon {
+  font-size: 1.6rem;
+  color: #EF4444;
+}
+
+.resume-modal-title h3 {
+  font-family: var(--font-h);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.resume-modal-subtitle {
+  font-family: var(--font-m);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.resume-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.resume-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-h);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.4rem;
+}
+
+.resume-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #EF4444;
+}
+
+.resume-modal-body {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  position: relative;
+}
+
+.resume-pdf-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@media (max-width: 640px) {
+  .resume-modal-overlay {
+    padding: 0.5rem;
+  }
+  .resume-modal-container {
+    height: 94vh;
+    border-radius: 12px;
+  }
+  .resume-modal-header {
+    padding: 0.85rem 1rem;
+  }
+  .btn-text {
+    display: none;
+  }
+}

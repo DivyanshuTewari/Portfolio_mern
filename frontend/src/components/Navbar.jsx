@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ResumeModal from './ResumeModal';
 import './Navbar.css';
 
 const navLinks = [
@@ -10,9 +11,10 @@ const navLinks = [
   { id: 'contact',      label: 'Contact' }
 ];
 
-const Navbar = () => {
+const Navbar = ({ onOpenResume }) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen]         = useState(false);
+  const [resumeOpen, setResumeOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -23,6 +25,15 @@ const Navbar = () => {
   const goTo = (id) => {
     setOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleOpenResume = () => {
+    setOpen(false);
+    if (onOpenResume) {
+      onOpenResume();
+    } else {
+      setResumeOpen(true);
+    }
   };
 
   return (
@@ -40,9 +51,10 @@ const Navbar = () => {
         </nav>
 
         {/* Resume CTA */}
-        <a href="/Data/Resume2025.pdf" target="_blank" rel="noopener noreferrer" className="btn btn--sm btn--primary navbar-resume">
+        <button onClick={handleOpenResume} className="btn btn--sm btn--primary navbar-resume">
+          <i className="fas fa-file-pdf" style={{ marginRight: '6px' }} />
           Resume
-        </a>
+        </button>
 
         {/* Hamburger */}
         <button
@@ -54,17 +66,53 @@ const Navbar = () => {
         </button>
       </div>
 
+      {/* Backdrop overlay */}
+      {open && <div className="mobile-overlay" onClick={() => setOpen(false)} />}
+
       {/* Mobile drawer */}
       <div className={`mobile-drawer ${open ? 'open' : ''}`}>
-        {navLinks.map(l => (
-          <button key={l.id} className="mobile-link" onClick={() => goTo(l.id)}>
-            {l.label}
+        <div className="mobile-drawer-header">
+          <span className="drawer-title">Menu</span>
+          <button
+            className="drawer-close-btn"
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+          >
+            ✕
           </button>
-        ))}
-        <a href="/Data/Resume2025.pdf" target="_blank" rel="noopener noreferrer" className="btn btn--primary" style={{ marginTop: '1rem' }}>
-          Download Resume
-        </a>
+        </div>
+
+        <div className="mobile-drawer-body">
+          {navLinks.map(l => (
+            <button key={l.id} className="mobile-link" onClick={() => goTo(l.id)}>
+              {l.label}
+            </button>
+          ))}
+          
+          <div className="mobile-resume-actions" style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <button
+              onClick={handleOpenResume}
+              className="btn btn--outline"
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              <i className="fas fa-eye" style={{ marginRight: '6px' }} /> Preview Resume
+            </button>
+            <a
+              href="/Data/Resume2025.pdf"
+              download="Divyanshu_Tewari_Resume.pdf"
+              className="btn btn--primary"
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              <i className="fas fa-download" style={{ marginRight: '6px' }} /> Download Resume
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* Standalone modal if not handled by parent */}
+      {!onOpenResume && (
+        <ResumeModal isOpen={resumeOpen} onClose={() => setResumeOpen(false)} />
+      )}
     </header>
   );
 };

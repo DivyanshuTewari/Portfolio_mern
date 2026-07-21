@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import CanvasBackground  from './components/CanvasBackground';
 import ChapterProgress   from './components/ChapterProgress';
@@ -12,17 +12,20 @@ import Achievements      from './components/Achievements';
 import FutureGoals       from './components/FutureGoals';
 import Contact           from './components/Contact';
 import Footer            from './components/Footer';
+import ResumeModal       from './components/ResumeModal';
 
 import './index.css';
 
 function App() {
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
+
   return (
     <>
       {/* Animated background canvas */}
       <CanvasBackground />
 
       {/* Fixed UI elements */}
-      <Navbar />
+      <Navbar onOpenResume={() => setIsResumeOpen(true)} />
       <ChapterProgress />
 
       {/* Story chapters */}
@@ -38,6 +41,9 @@ function App() {
       </main>
 
       <Footer />
+
+      {/* Resume Preview Modal */}
+      <ResumeModal isOpen={isResumeOpen} onClose={() => setIsResumeOpen(false)} />
     </>
   );
 }
