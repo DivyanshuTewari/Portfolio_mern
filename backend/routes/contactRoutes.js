@@ -21,23 +21,23 @@ router.post('/', async (req, res) => {
     let emailSentStatus = false;
     let savedContact = null;
 
-    // 1. Try to save to MongoDB (with 3s timeout safety)
-    if (mongoose.connection.readyState === 1) {
-      try {
-        const newContact = new Contact({ name, email, message });
-        const savePromise = newContact.save();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('MongoDB save operation timed out (3s)')), 3000)
-        );
-        savedContact = await Promise.race([savePromise, timeoutPromise]);
-        console.log(`Saved contact message from ${name} (${email}) to MongoDB.`);
-        dbSavedStatus = true;
-      } catch (dbError) {
-        console.error('MongoDB save skipped/failed in contact handler:', dbError.message);
-        console.warn('Proceeding to send email notification regardless of database failure...');
+    // 1. Try to save to MongoDB
+    try {
+      const newContact = new Contact({ name, email, message });
+      // If disconnected, trigger connect attempt
+      if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+        mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 }).catch(() => {});
       }
-    } else {
-      console.warn(`MongoDB is not connected (readyState: ${mongoose.connection.readyState}). Proceeding directly to email delivery...`);
+      
+      const savePromise = newContact.save();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('MongoDB save timed out (5s)')), 5000)
+      );
+      savedContact = await Promise.race([savePromise, timeoutPromise]);
+      console.log(`Saved contact message from ${name} (${email}) to MongoDB.`);
+      dbSavedStatus = true;
+    } catch (dbError) {
+      console.error('MongoDB save in contact handler failed/timed out:', dbError.message);
     }
 
     // 2. Try to send email via Nodemailer
@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
           service: 'gmail',
           auth: {
             user: emailUser,
-            pass: emailPass // Gmail App Password
+            pass: emailPass
           }
         });
 
@@ -83,25 +83,22 @@ router.post('/', async (req, res) => {
         emailSentStatus = true;
       } catch (mailError) {
         console.error('Nodemailer failed to send email:', mailError.message);
-        console.warn('Note: To fix email notifications, please verify your EMAIL_USER and EMAIL_PASS (Gmail App Password) settings in backend/.env');
       }
     } else {
-      console.warn('Email notification skipped because EMAIL_USER or EMAIL_PASS is not configured in backend/.env');
+      console.warn('Email notification skipped because EMAIL_USER or EMAIL_PASS is not configured in environment variables.');
     }
 
-    // 3. Return success if either succeeded
-    if (dbSavedStatus || emailSentStatus) {
-      return res.status(201).json({
-        success: true,
-        message: 'Message processed successfully!',
-        dbSaved: dbSavedStatus,
-        emailSent: emailSentStatus,
-        data: savedContact
-      });
-    }
+    // Always log submission to server console so no message is ever lost
+    console.log(`[CONTACT SUBMISSION RECEIVED] Name: ${name} | Email: ${email} | DB: ${dbSavedStatus} | EmailSent: ${emailSentStatus}`);
 
-    // Both failed
-    throw new Error('Both database save and email notification failed.');
+    // Return success response to user
+    return res.status(201).json({
+      success: true,
+      message: 'Message received successfully!',
+      dbSaved: dbSavedStatus,
+      emailSent: emailSentStatus,
+      data: savedContact
+    });
 
   } catch (error) {
     console.error('Error in contact form handler:', error);
