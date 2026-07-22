@@ -30,8 +30,7 @@ if (!mongoURI) {
   console.error('CRITICAL ERROR: MONGO_URI is not defined in environment variables. Please check your .env file.');
 }
 
-// Disable buffering globally so queries fail immediately if DB is offline/unreachable
-mongoose.set('bufferCommands', false);
+
 
 mongoose.connect(mongoURI, {
   serverSelectionTimeoutMS: 5000 // 5 seconds timeout
