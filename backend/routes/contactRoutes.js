@@ -1,5 +1,6 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
+import mongoose from 'mongoose';
 import Contact from '../models/Contact.js';
 
 const router = express.Router();
@@ -20,15 +21,23 @@ router.post('/', async (req, res) => {
     let emailSentStatus = false;
     let savedContact = null;
 
-    // 1. Try to save to MongoDB
-    try {
-      const newContact = new Contact({ name, email, message });
-      savedContact = await newContact.save();
-      console.log(`Saved contact message from ${name} (${email}) to MongoDB.`);
-      dbSavedStatus = true;
-    } catch (dbError) {
-      console.error('MongoDB save failed in contact handler:', dbError.message);
-      console.warn('Proceeding to send email notification regardless of database failure...');
+    // 1. Try to save to MongoDB (with 3s timeout safety)
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const newContact = new Contact({ name, email, message });
+        const savePromise = newContact.save();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('MongoDB save operation timed out (3s)')), 3000)
+        );
+        savedContact = await Promise.race([savePromise, timeoutPromise]);
+        console.log(`Saved contact message from ${name} (${email}) to MongoDB.`);
+        dbSavedStatus = true;
+      } catch (dbError) {
+        console.error('MongoDB save skipped/failed in contact handler:', dbError.message);
+        console.warn('Proceeding to send email notification regardless of database failure...');
+      }
+    } else {
+      console.warn(`MongoDB is not connected (readyState: ${mongoose.connection.readyState}). Proceeding directly to email delivery...`);
     }
 
     // 2. Try to send email via Nodemailer
