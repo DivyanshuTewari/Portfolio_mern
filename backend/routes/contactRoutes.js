@@ -28,14 +28,18 @@ router.post('/', async (req, res) => {
       let dbSavedStatus = false;
       let emailSentStatus = false;
 
-      // 1. Try to save to MongoDB
-      try {
-        const newContact = new Contact({ name, email, message });
-        await newContact.save();
-        console.log(`[SUCCESS] Saved contact message from ${name} (${email}) to MongoDB.`);
-        dbSavedStatus = true;
-      } catch (dbError) {
-        console.error('[WARN] MongoDB save failed in background:', dbError.message);
+      // 1. Try to save to MongoDB (only if connected)
+      if (mongoose.connection.readyState === 1) {
+        try {
+          const newContact = new Contact({ name, email, message });
+          await newContact.save();
+          console.log(`[SUCCESS] Saved contact message from ${name} (${email}) to MongoDB.`);
+          dbSavedStatus = true;
+        } catch (dbError) {
+          console.error('[WARN] MongoDB save failed in background:', dbError.message);
+        }
+      } else {
+        console.log(`[INFO] MongoDB connection readyState is ${mongoose.connection.readyState}. Skipped DB save.`);
       }
 
       // 2. Try to send email via Nodemailer with 3s timeout limits

@@ -26,20 +26,18 @@ app.use(express.urlencoded({ extended: true }));
 // DB Connection
 const mongoURI = process.env.MONGO_URI;
 
-if (!mongoURI) {
-  console.error('CRITICAL ERROR: MONGO_URI is not defined in environment variables. Please check your .env file.');
+if (mongoURI) {
+  mongoose.connect(mongoURI, {
+    serverSelectionTimeoutMS: 5000 // 5 seconds timeout
+  })
+    .then(() => console.log('Successfully connected to MongoDB Database.'))
+    .catch(err => {
+      console.error('MongoDB database connection failed:', err.message);
+      console.warn('Backend server will continue running.');
+    });
+} else {
+  console.warn('WARNING: MONGO_URI is not set in environment variables. DB connection skipped.');
 }
-
-
-
-mongoose.connect(mongoURI, {
-  serverSelectionTimeoutMS: 5000 // 5 seconds timeout
-})
-  .then(() => console.log('Successfully connected to MongoDB Database.'))
-  .catch(err => {
-    console.error('MongoDB database connection failed:', err.message);
-    console.warn('Backend server will continue running. Please make sure your current IP is whitelisted in MongoDB Atlas: https://www.mongodb.com/docs/atlas/security-whitelist/');
-  });
 
 // Routes
 app.use('/api/contact', contactRoutes);
