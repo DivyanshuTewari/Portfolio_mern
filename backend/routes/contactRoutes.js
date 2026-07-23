@@ -8,7 +8,7 @@ const router = express.Router();
 // @desc    Create a new contact submission and send email
 // @route   POST /api/contact
 // @access  Public
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   try {
     const { name, email, message } = req.body;
 
@@ -17,18 +17,18 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please provide name, email and message.' });
     }
 
-    // Return instant success response to the client so Vercel frontend never times out
+    // 1. Immediately return HTTP 201 response to browser (<50ms)
     res.status(201).json({
       success: true,
       message: 'Message received successfully!'
     });
 
-    // Process DB save and email delivery asynchronously in the background
-    (async () => {
+    // 2. Schedule DB save and email notification in macro-task queue AFTER HTTP response is sent
+    setImmediate(async () => {
       let dbSavedStatus = false;
       let emailSentStatus = false;
 
-      // 1. Try to save to MongoDB (only if connected)
+      // Try to save to MongoDB (only if connected)
       if (mongoose.connection.readyState === 1) {
         try {
           const newContact = new Contact({ name, email, message });
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
         console.log(`[INFO] MongoDB connection readyState is ${mongoose.connection.readyState}. Skipped DB save.`);
       }
 
-      // 2. Try to send email via Nodemailer with 3s timeout limits
+      // Try to send email via Nodemailer
       const emailUser = process.env.EMAIL_USER;
       const emailPass = process.env.EMAIL_PASS;
       const receiverEmail = process.env.RECEIVER_EMAIL || 'divyanshutiwari500@gmail.com';
@@ -55,9 +55,9 @@ router.post('/', async (req, res) => {
               user: emailUser,
               pass: emailPass
             },
-            connectionTimeout: 3000,
-            greetingTimeout: 3000,
-            socketTimeout: 3000
+            connectionTimeout: 4000,
+            greetingTimeout: 4000,
+            socketTimeout: 4000
           });
 
           const mailOptions = {
@@ -94,7 +94,7 @@ router.post('/', async (req, res) => {
       }
 
       console.log(`[CONTACT RECORD PROCESSED] Name: ${name} | Email: ${email} | DB: ${dbSavedStatus} | EmailSent: ${emailSentStatus}`);
-    })();
+    });
 
   } catch (error) {
     console.error('Error in contact form handler:', error);

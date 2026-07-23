@@ -17,7 +17,27 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'] : '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    
+    const allowed = [
+      'https://divyanshutewari.vercel.app',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+
+    if (process.env.CLIENT_URL) {
+      const cleanClientUrl = process.env.CLIENT_URL.trim().replace(/\/$/, '');
+      allowed.push(cleanClientUrl);
+    }
+
+    if (allowed.some(url => origin.startsWith(url)) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
